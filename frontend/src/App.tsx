@@ -1,34 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import styled from "styled-components";
+
+type ButtonType = "text" | "file" | "picture";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [type, setType] = useState<ButtonType>("text");
+
+  const handleButtonClick = (type: ButtonType) => {
+    setType(type);
+  };
+
+  const handleUpload = () => {};
 
   return (
     <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h2>随手传</h2>
+      <Buttons>
+        <Button onClick={() => handleButtonClick("text")}>传文本</Button>
+        <Button onClick={() => handleButtonClick("file")}>传文件</Button>
+        <Button onClick={() => handleButtonClick("picture")}>传图片</Button>
+      </Buttons>
+      <Container>
+        {type === "text" && <textarea cols={70} rows={20}></textarea>}
+        {type === "file" && <div>点击选择文件</div>}
+        {type === "picture" && <div>点击选择图片</div>}
+      </Container>
+      <UploadButton onClick={handleUpload}>上传</UploadButton>
     </div>
-  )
+  );
 }
 
-export default App
+const Buttons = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Button = styled.div`
+  width: 8rem;
+  font-size: 1.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 0 2rem;
+  line-height: 3rem;
+  cursor: pointer;
+`;
+
+const Container = styled.div`
+  margin-top: 2rem;
+`;
+
+const UploadButton = styled.button``;
+
+export default App;
