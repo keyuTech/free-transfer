@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import styled from "styled-components";
+import axios from "axios";
 
 type ButtonType = "text" | "file" | "picture";
 
@@ -11,7 +12,11 @@ function App() {
     setType(type);
   };
 
-  const handleUpload = () => {};
+  const handleUpload = () => {
+    if (type === "text") {
+      axios.post("/api/v1/texts", { raw: "123" });
+    }
+  };
 
   return (
     <div className="App">
