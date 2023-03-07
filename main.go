@@ -30,6 +30,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		router.POST("/api/v1/texts", TextController)
+		router.POST("/api/v1/images", ImageController)
 		router.StaticFS("/static", http.FS(staticFiles))
 		router.NoRoute(func(ctx *gin.Context) {
 			path := ctx.Request.URL.Path
@@ -48,7 +50,6 @@ func main() {
 				ctx.Status(http.StatusNotFound)
 			}
 		})
-		router.POST("/api/v1/texts", TextController)
 		router.Run(":8080")
 	}()
 	ui, _ := lorca.New("http://127.0.0.1:8080/static/index.html", "", 800, 600, "--disable-sync", "--disable-translate")
@@ -89,11 +90,15 @@ func TextController(context *gin.Context) {
 		// create full path for text file
 		fullpath := filepath.Join("uploads", filename+".txt")
 		// write file
-		err = ioutil.WriteFile(filepath.Join(dir, fullpath), []byte(json.Raw), os.ModePerm)
+		err = ioutil.WriteFile(filepath.Join(dir, fullpath), []byte(json.Raw), 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
 		// return the file path
 		context.JSON(http.StatusOK, gin.H{"url": "/"+fullpath})
 	}
+}
+
+func ImageController(context *gin.Context) {
+
 }
