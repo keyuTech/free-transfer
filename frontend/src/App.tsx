@@ -1,9 +1,9 @@
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/home";
-import TextUpload from "./pages/text-upload";
-import ImageUpload from "./pages/image-upload";
-import FileUpload from "./pages/file-upload";
+import TextUpload from "./components/text-upload";
+import ImageUpload from "./components/image-upload";
+import FileUpload from "./components/file-upload";
 
 function App() {
   return (

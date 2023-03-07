@@ -1,9 +1,14 @@
-import { FormEvent } from "react";
+import { ChangeEvent, FormEvent } from "react";
 import styled from "styled-components";
 
 const ImageUpload: React.FC = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log(e.target);
+  };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.files);
   };
 
   return (
@@ -14,6 +19,7 @@ const ImageUpload: React.FC = () => {
         name={"image"}
         accept={"image/gif,image/jpeg,image/jpg,image/png,image/svg"}
         multiple
+        onChange={handleChange}
       />
       <SubmitButton>
         <Button type={"submit"}>上传</Button>
