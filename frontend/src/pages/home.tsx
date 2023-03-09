@@ -1,32 +1,38 @@
 import axios from "axios";
-import { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 export type ButtonType = "text" | "file" | "image";
 
 const Home: React.FC = () => {
-  const [type, setType] = useState<ButtonType>("text");
-
-  const handleButtonClick = (type: ButtonType) => {
-    setType(type);
-  };
-
+  useEffect(() => {
+    const getAddresses = async () => {
+      return await axios.get("http://localhost:8080/api/v1/addresses");
+    };
+    getAddresses().then(
+      (data) => {
+        console.log(data);
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+  }, []);
   return (
     <Container>
       <h2>随手传</h2>
       <Buttons>
-        <ButtonLink to={"/text"}>
-          <Button onClick={() => handleButtonClick("text")}>传文本</Button>
+        <ButtonLink to={"/"}>
+          <Button>传文本</Button>
         </ButtonLink>
         <ButtonLink to={"/image"}>
-          <Button onClick={() => handleButtonClick("image")}>传图片</Button>
+          <Button>传图片</Button>
         </ButtonLink>
         <ButtonLink to={"/file"}>
-          <Button onClick={() => handleButtonClick("file")}>传文件</Button>
+          <Button>传文件</Button>
         </ButtonLink>
       </Buttons>
-      <Outlet />
     </Container>
   );
 };
