@@ -2,10 +2,10 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,9 +30,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		router.StaticFS("/static", http.FS(staticFiles))
+		router.GET("/api/v1/addresses", AddressController)
+		router.GET("/uploads/:path", UploadsController)
 		router.POST("/api/v1/texts", TextController)
 		router.POST("/api/v1/images", ImageController)
-		router.StaticFS("/static", http.FS(staticFiles))
 		router.NoRoute(func(ctx *gin.Context) {
 			path := ctx.Request.URL.Path
 			if strings.HasPrefix(path, "/static") {
@@ -63,6 +65,42 @@ func main() {
 	ui.Close()
 }
 
+func AddressController(context *gin.Context) {
+	addrs, _ := net.InterfaceAddrs()
+	var result []string
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				result = append(result, ipnet.IP.String())
+			}
+		}
+	}
+	context.JSON(http.StatusOK, gin.H{"addresses": result})
+}
+
+func getDirPath() (uploads string) {
+	exe, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	dir := filepath.Dir(exe)
+	uploads = filepath.Join(dir, "uploads")
+	return
+}
+
+func UploadsController(context *gin.Context) {
+	if path := context.Param("path"); path != "" {
+		target := filepath.Join(getDirPath(), path)
+		context.Header("Content-Description", "File Transfer")
+		context.Header("Content-Transfer-Encoding", "binary")
+		context.Header("Content-Disposition", "attachment; filename="+path)
+		context.Header("Content-Type", "application/octet-stream")
+		context.File(target)
+	} else {
+		context.Status(http.StatusNotFound)
+	}
+}
+
 func TextController(context *gin.Context) {
 	var json struct {
 		Raw string `json:"raw"`
@@ -77,11 +115,10 @@ func TextController(context *gin.Context) {
 			log.Fatal(err)
 		}
 		dir := filepath.Dir(exe)
-		fmt.Println(dir)
-		// create a name for text file
-		filename := strings.ReplaceAll(time.Now().Format("2006-01-02 15:04:05"), " ", "-")
 		// create a save path for text file
 		dirPath := filepath.Join(dir, "uploads")
+		// create a name for text file
+		filename := strings.ReplaceAll(time.Now().Format("2006-01-02 15:04:05"), " ", "-")
 		// create dir for text file
 		err = os.MkdirAll(dirPath, os.ModePerm)
 		if err != nil {
@@ -95,7 +132,7 @@ func TextController(context *gin.Context) {
 			log.Fatal(err)
 		}
 		// return the file path
-		context.JSON(http.StatusOK, gin.H{"url": "/"+fullpath})
+		context.JSON(http.StatusOK, gin.H{"url": "/" + fullpath})
 	}
 }
 
